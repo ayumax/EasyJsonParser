@@ -4,6 +4,7 @@
 
 #include "EasyJsonValue.h"
 #include "EasyJsonParserEnums.h"
+#include "Dom/JsonObject.h"
 #include "EasyJsonObject.generated.h"
 
 class UEasyJsonAttribute;
@@ -14,7 +15,7 @@ class EASYJSONPARSER_API UEasyJsonObject : public UObject
 	GENERATED_BODY()
 	
 public:
-	static UEasyJsonObject* CreateElement(UEasyJsonValue* ParentObject, FString Tag, FString Content, int32 LineNumber);
+	static UEasyJsonObject* CreateEasyJsonObject(TSharedPtr<FJsonObject> JsonObject);
 
 public:
 	UFUNCTION(BlueprintPure, Category = "EasyJsonParser|ReadValue")
@@ -44,11 +45,7 @@ private:
 	bool IsAccessAsArray(const FString& AccessName, FString& ElementName, int32& ArrayIndex);
 
 
-public:
-	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParser|Object")
-	TMap<FString, UEasyJsonObject*> Objects;
-
-	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParser|Object")
-	TMap<FString, UEasyJsonValue*> Values;
+private:
+	TSharedPtr<FJsonObject> InnerObject;
 
 };
