@@ -2,10 +2,10 @@
 #include "EasyJsonObject.h"
 #include "Internationalization/Regex.h"
 
-UEasyJsonObject* UEasyJsonObject::CreateElement(UEasyJsonValue* ParentObject, FString Tag, FString Content, int32 _LineNumber)
+UEasyJsonObject* UEasyJsonObject::CreateEasyJsonObject(TSharedPtr<FJsonObject> JsonObject)
 {
-	auto newElement = NewObject<UEasyJsonObject>(ParentObject == nullptr ? (UObject*)GetTransientPackage() : ParentObject);
-	newElement->LineNumber = _LineNumber;
+	auto newElement = NewObject<UEasyJsonObject>();
+	newElement->InnerObject = JsonObject;
 
 	return newElement;
 }
@@ -68,16 +68,11 @@ TArray<UEasyJsonObject*> UEasyJsonObject::ReadElements(const FString& AccessStri
 
 		if (accesseName.IsEmpty()) return foundElements;
 
-		if (accesseName[0] == TEXT('@'))
-		{
-			return foundElements;
-		}
-
 		FString elementName;
 		int32 arrayIndex = 0;
 		bool IsArrayAccess = IsAccessAsArray(accesseName, elementName, arrayIndex);
 
-
+		a
 	}
 
 	Result = EEasyJsonParserFound::Found;
@@ -90,7 +85,7 @@ UEasyJsonValue* UEasyJsonObject::ReadEasyJsonValue(const FString& AccessString)
 	TArray<FString> Accessers;
 	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
 
-	auto parentNode = this;
+	auto parentNode = InnerObject;
 
 	for (auto accesseName : Accessers)
 	{
@@ -98,11 +93,45 @@ UEasyJsonValue* UEasyJsonObject::ReadEasyJsonValue(const FString& AccessString)
 		if (accesseName.IsEmpty()) return nullptr;
 
 		
-		FString elementName;
+		FString propertyName;
 		int32 arrayIndex = 0;
-		IsAccessAsArray(accesseName, elementName, arrayIndex);
+		bool isArray = IsAccessAsArray(accesseName, propertyName, arrayIndex);
 
-		
+		if (parentNode->HasField(propertyName))
+		{
+			if (isArray)
+			{
+				const TArray<TSharedPtr<FJsonValue>>* arrayValue;
+				if (parentNode->TryGetArrayField(propertyName, arrayValue))
+				{
+					if (arrayValue->Num() > arrayIndex)
+					{
+						auto value = (*arrayValue)[arrayIndex];
+						parentNode = value->AsObject();
+
+						if (accesseName.Equals(Accessers.Last()))
+						{
+							return UEasyJsonValue::CreateEasyJsonValue(value);
+						}
+					}
+				}
+			}
+			else
+			{
+				const TSharedPtr<FJsonObject>* objectValue;
+				if (parentNode->TryGetObjectField(propertyName, objectValue))
+				{
+					parentNode = *objectValue;
+				}
+				else
+				{
+					if (accesseName.Equals(Accessers.Last()))
+					{
+						return UEasyJsonValue::CreateEasyJsonValue(parentNode->TryGetField(propertyName));
+					}
+				}
+			}
+		}
 	}
 
 	return nullptr;

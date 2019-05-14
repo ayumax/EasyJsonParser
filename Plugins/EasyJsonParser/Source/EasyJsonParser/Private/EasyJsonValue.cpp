@@ -2,6 +2,14 @@
 
 #include "EasyJsonValue.h"
 
+UEasyJsonValue* UEasyJsonValue::CreateEasyJsonValue(TSharedPtr<FJsonValue> JsonValue)
+{
+	auto newElement = NewObject<UEasyJsonValue>();
+	newElement->InnerObject = JsonValue;
+
+	return newElement;
+}
+
 int32 UEasyJsonValue::GetIntValue(int32 DefaultValue)
 {
 	if (Value.IsEmpty()) return DefaultValue;

@@ -15,28 +15,12 @@ EasyJsonObjectMaker::~EasyJsonObjectMaker()
 
 UEasyJsonObject* EasyJsonObjectMaker::Parse(FString jsonString, FString &ErrorMessage)
 {
-	
 	TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(jsonString);
 	TSharedPtr<FJsonObject> JsonObject = MakeShareable(new FJsonObject());
 	if (FJsonSerializer::Deserialize(JsonReader, JsonObject) && JsonObject.IsValid())
-	{
-		UEasyJsonObject* retObject = NewObject<UEasyJsonObject>();
-		
-		MakeEasyJsonValue(JsonObject, retObject);
-		
-		return retObject;
+	{	
+		return UEasyJsonObject::CreateEasyJsonObject(JsonObject);
 	}
 
 	return nullptr;
-}
-
-void EasyJsonObjectMaker::MakeEasyJsonValue(TSharedPtr<FJsonObject> JsonObject, UEasyJsonObject* EasyJsonValue)
-{
-	for (auto& jsonValuePair : JsonObject->Values)
-	{
-		if (jsonValuePair.Value->AsObject())
-		{
-
-		}
-	}
 }

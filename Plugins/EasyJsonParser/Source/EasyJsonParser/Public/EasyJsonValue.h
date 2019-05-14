@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Dom/JsonValue.h"
 #include "EasyJsonValue.generated.h"
 
 
@@ -11,6 +12,9 @@ class EASYJSONPARSER_API UEasyJsonValue : public UObject
 {
 	GENERATED_BODY()
 	
+public:
+	static UEasyJsonValue* CreateEasyJsonValue(TSharedPtr<FJsonValue> JsonValue);
+
 public:
 	UFUNCTION(BlueprintPure, Category = "EasyJsonParser|GetValue")
 	int32 GetIntValue(int32 DefaultValue = 0);
@@ -31,7 +35,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParser|Object")
 	FString Value = TEXT("");
 	
-	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParser|Object")
-	UEasyJsonValue* Parent = nullptr;
+private:
+	TSharedPtr<FJsonObject> InnerObject;
 
 };
