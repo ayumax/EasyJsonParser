@@ -60,7 +60,7 @@ TArray<UEasyJsonObject*> UEasyJsonObject::ReadElements(const FString& AccessStri
 
 	Result = EEasyJsonParserFound::NotFound;
 
-	auto parentNode = this;
+	auto parentNode = InnerObject;
 
 	for (int i = 0; i < Accessers.Num(); ++i)
 	{
@@ -70,9 +70,45 @@ TArray<UEasyJsonObject*> UEasyJsonObject::ReadElements(const FString& AccessStri
 
 		FString elementName;
 		int32 arrayIndex = 0;
-		bool IsArrayAccess = IsAccessAsArray(accesseName, elementName, arrayIndex);
+		FString propertyName;
+		int32 arrayIndex = 0;
+		bool isArray = IsAccessAsArray(accesseName, propertyName, arrayIndex);
 
-		a
+		if (parentNode->HasField(propertyName))
+		{
+			if (isArray)
+			{
+				const TArray<TSharedPtr<FJsonValue>>* arrayValue;
+				if (parentNode->TryGetArrayField(propertyName, arrayValue))
+				{
+					if (arrayValue->Num() > arrayIndex)
+					{
+						auto value = (*arrayValue)[arrayIndex];
+						parentNode = value->AsObject();
+
+						if (accesseName.Equals(Accessers.Last()))
+						{
+							return UEasyJsonValue::CreateEasyJsonValue(value);
+						}
+					}
+				}
+			}
+			else
+			{
+				const TSharedPtr<FJsonObject>* objectValue;
+				if (parentNode->TryGetObjectField(propertyName, objectValue))
+				{
+					parentNode = *objectValue;
+				}
+				else
+				{
+					if (accesseName.Equals(Accessers.Last()))
+					{
+						return UEasyJsonValue::CreateEasyJsonValue(parentNode->TryGetField(propertyName));
+					}
+				}
+			}
+		}
 	}
 
 	Result = EEasyJsonParserFound::Found;
