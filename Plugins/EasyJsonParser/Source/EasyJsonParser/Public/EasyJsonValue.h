@@ -28,14 +28,7 @@ public:
 	UFUNCTION(BlueprintPure, Category = "EasyJsonParser|GetValue")
 	bool GetBoolValue(bool DefaultValue = false);
 
-public:
-	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParser|Object")
-	FString Name = TEXT("");
-
-	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParser|Object")
-	FString Value = TEXT("");
-	
 private:
-	TSharedPtr<FJsonObject> InnerObject;
+	TSharedPtr<FJsonValue> InnerObject;
 
 };
