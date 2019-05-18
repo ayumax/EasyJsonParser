@@ -7,19 +7,18 @@
 #include "Utils/EasyJsonObjectMaker.h"
 
 
-UEasyJsonObject* UEasyJsonParseManager::LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result, FString& ErrorMessage)
+UEasyJsonObject* UEasyJsonParseManager::LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result)
 {
 	EasyJsonObjectMaker objectMaker;
 	FString _errorMessage;
 
 	auto rootElement = objectMaker.Parse(JsonString, _errorMessage);
 	Result = rootElement != nullptr ? EEasyJsonParserErrorCode::Successed : EEasyJsonParserErrorCode::Failed;
-	ErrorMessage = _errorMessage;
 
 	return rootElement;
 }
 
-UEasyJsonObject* UEasyJsonParseManager::LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result, FString& ErrorMessage)
+UEasyJsonObject* UEasyJsonParseManager::LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result)
 {
 	auto readPath = FilePath;
 	if (!IsAblolute)
@@ -33,5 +32,5 @@ UEasyJsonObject* UEasyJsonParseManager::LoadFromFile(const FString& FilePath, bo
 
 	FFileHelper::LoadFileToString(JsonString, *readPath);
 
-	return LoadFromString(JsonString, Result, ErrorMessage);
+	return LoadFromString(JsonString, Result);
 }

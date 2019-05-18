@@ -118,7 +118,7 @@ UEasyJsonValue* UEasyJsonObject::ReadEasyJsonValue(const FString& AccessString)
 
 		if (accesseName.Equals(Accessers.Last()))
 		{
-			return UEasyJsonValue::CreateEasyJsonValue(parentNode->TryGetField(propertyName));
+			return GetJsonValue(parentNode, propertyName, arrayIndex);
 		}
 		else
 		{
@@ -194,4 +194,15 @@ void UEasyJsonObject::GetObject(const TSharedPtr<FJsonObject> TargetObject, cons
 			Objects.Emplace(*objectValue);
 		}
 	}
+}
+
+UEasyJsonValue* UEasyJsonObject::GetJsonValue(const TSharedPtr<FJsonObject> TargetObject, const FString& PropertyName, int32 ArrayIndex)
+{
+	const TArray<TSharedPtr<FJsonValue>>* jsonArrayValue;
+	if (TargetObject->TryGetArrayField(PropertyName, jsonArrayValue))
+	{
+		return UEasyJsonValue::CreateEasyJsonValue((*jsonArrayValue)[ArrayIndex]);
+	}
+
+	return UEasyJsonValue::CreateEasyJsonValue(TargetObject->TryGetField(PropertyName));
 }
