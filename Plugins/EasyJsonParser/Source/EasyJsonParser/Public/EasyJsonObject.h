@@ -44,6 +44,7 @@ public:
 private:
 	bool IsAccessAsArray(const FString& AccessName, FString& ElementName, int32& ArrayIndex);
 	void GetObject(const TSharedPtr<FJsonObject> TargetObject, const FString& PropertyName, TArray<TSharedPtr<FJsonObject>>& Objects);
+	UEasyJsonValue* GetJsonValue(const TSharedPtr<FJsonObject> TargetObject, const FString& PropertyName, int32 ArrayIndex);
 
 private:
 	TSharedPtr<FJsonObject> InnerObject;

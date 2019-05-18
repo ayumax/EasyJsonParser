@@ -23,7 +23,7 @@ public:
 	 * @return Json object
 	 */
 	UFUNCTION(BlueprintCallable, Category = "EasyJsonParser", meta = (ExpandEnumAsExecs = "Result"))
-	static UEasyJsonObject* LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result, FString& ErrorMessage);
+	static UEasyJsonObject* LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result);
 
 	/**
 	 * load Json string
@@ -31,6 +31,6 @@ public:
 	 * @return Json object
 	 */
 	UFUNCTION(BlueprintCallable, Category = "EasyJsonParser", meta = (ExpandEnumAsExecs = "Result"))
-	static UEasyJsonObject* LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result, FString& ErrorMessage);
+	static UEasyJsonObject* LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result);
 
 };
