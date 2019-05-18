@@ -12,44 +12,55 @@ UEasyJsonValue* UEasyJsonValue::CreateEasyJsonValue(TSharedPtr<FJsonValue> JsonV
 
 int32 UEasyJsonValue::GetIntValue(int32 DefaultValue)
 {
-	if (Value.IsEmpty()) return DefaultValue;
+	if (InnerObject->IsNull()) return DefaultValue;
 
-	int32 _index = 0;
+	int32 intValue = 0;
 
-	if (Value.IsNumeric() && !Value.FindChar(TEXT('.'), _index))
+	if (InnerObject->TryGetNumber(intValue))
 	{
-		return FCString::Atoi(*Value);
+		return intValue;
 	}
-		
+
 	return DefaultValue;
 }
 
 float UEasyJsonValue::GetFloatValue(float DefaultValue)
 {
-	if (Value.IsEmpty()) return DefaultValue;
+	if (InnerObject->IsNull()) return DefaultValue;
 
-	auto isSuccess = Value.IsNumeric();
-	return isSuccess ? FCString::Atof(*Value) : DefaultValue;
+	double floatValue = 0;
+
+	if (InnerObject->TryGetNumber(floatValue))
+	{
+		return (float)floatValue;
+	}
+
+	return DefaultValue;
 }
 
 FString UEasyJsonValue::GetStringValue(FString DefaultValue)
 {
-	if (Value.IsEmpty()) return DefaultValue;
+	if (InnerObject->IsNull()) return DefaultValue;
 
-	return Value;
+	FString stringValue;
+
+	if (InnerObject->TryGetString(stringValue))
+	{
+		return stringValue;
+	}
+
+	return DefaultValue;
 }
 
 bool UEasyJsonValue::GetBoolValue(bool DefaultValue)
 {
-	if (Value.IsEmpty()) return DefaultValue;
+	if (InnerObject->IsNull()) return DefaultValue;
 
-	if (Value.Equals(TEXT("true"), ESearchCase::IgnoreCase))
+	bool boolValue;
+
+	if (InnerObject->TryGetBool(boolValue))
 	{
-		return true;
-	}
-	else if (Value.Equals(TEXT("false"), ESearchCase::IgnoreCase))
-	{
-		return false;
+		return boolValue;
 	}
 
 	return DefaultValue;
