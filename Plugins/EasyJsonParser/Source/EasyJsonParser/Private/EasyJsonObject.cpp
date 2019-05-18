@@ -116,20 +116,24 @@ UEasyJsonValue* UEasyJsonObject::ReadEasyJsonValue(const FString& AccessString)
 		int32 arrayIndex = 0;
 		bool isArray = IsAccessAsArray(accesseName, propertyName, arrayIndex);
 
-		if (accesseName.Equals(Accessers.Last()))
+		if (parentNode->HasField(propertyName))
 		{
-			return GetJsonValue(parentNode, propertyName, arrayIndex);
-		}
-		else
-		{
-			TArray<TSharedPtr<FJsonObject>> Objects;
-			GetObject(parentNode, propertyName, Objects);
-
-			if (Objects.Num() > 0)
+			if (accesseName.Equals(Accessers.Last()))
 			{
-				parentNode = Objects[arrayIndex];
+				return GetJsonValue(parentNode, propertyName, arrayIndex);
+			}
+			else
+			{
+				TArray<TSharedPtr<FJsonObject>> Objects;
+				GetObject(parentNode, propertyName, Objects);
+
+				if (Objects.Num() > 0)
+				{
+					parentNode = Objects[arrayIndex];
+				}
 			}
 		}
+		
 
 		if (parentNode == beforeParentNode)
 		{
