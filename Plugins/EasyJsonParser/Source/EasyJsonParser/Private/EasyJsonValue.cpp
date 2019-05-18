@@ -12,6 +12,7 @@ UEasyJsonValue* UEasyJsonValue::CreateEasyJsonValue(TSharedPtr<FJsonValue> JsonV
 
 int32 UEasyJsonValue::GetIntValue(int32 DefaultValue)
 {
+	if (!InnerObject) return DefaultValue;
 	if (InnerObject->IsNull()) return DefaultValue;
 
 	int32 intValue = 0;
@@ -26,6 +27,7 @@ int32 UEasyJsonValue::GetIntValue(int32 DefaultValue)
 
 float UEasyJsonValue::GetFloatValue(float DefaultValue)
 {
+	if (!InnerObject) return DefaultValue;
 	if (InnerObject->IsNull()) return DefaultValue;
 
 	double floatValue = 0;
@@ -40,6 +42,7 @@ float UEasyJsonValue::GetFloatValue(float DefaultValue)
 
 FString UEasyJsonValue::GetStringValue(FString DefaultValue)
 {
+	if (!InnerObject) return DefaultValue;
 	if (InnerObject->IsNull()) return DefaultValue;
 
 	FString stringValue;
@@ -54,6 +57,7 @@ FString UEasyJsonValue::GetStringValue(FString DefaultValue)
 
 bool UEasyJsonValue::GetBoolValue(bool DefaultValue)
 {
+	if (!InnerObject) return DefaultValue;
 	if (InnerObject->IsNull()) return DefaultValue;
 
 	bool boolValue;

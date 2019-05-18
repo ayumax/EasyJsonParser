@@ -271,6 +271,85 @@ bool FNodeAccessTest::RunTest(const FString& Parameters)
 		TestEqual(TEXT("success read"), rootObject->ReadBool(TEXT("root[3]")), true);
 	}
 
+	{
+		FString jsonString =
+			TEXT("{\"menu\":")
+				TEXT("{")
+					TEXT("\"id\": \"file\",")
+					TEXT("\"value\" : \"File\",")
+					TEXT("\"popup\" :")
+					TEXT("{")
+					TEXT("\"menuitem\":")
+					TEXT("[")
+						TEXT("{\"value\": \"New\", \"onclick\" : \"CreateNewDoc()\"},")
+						TEXT("{ \"value\": \"Open\", \"onclick\" : \"OpenDoc()\" },")
+						TEXT("{ \"value\": \"Close\", \"onclick\" : \"CloseDoc()\" }")
+					TEXT("]")
+					TEXT("}")
+				TEXT("}");
+
+		EEasyJsonParserErrorCode result;
+		auto rootObject = UEasyJsonParseManager::LoadFromString(jsonString, result);
+
+		TestEqual(TEXT("failed load"), result, EEasyJsonParserErrorCode::Failed);
+
+	}
+
+	{
+		FString jsonString =
+			TEXT("\"menu\":")
+			TEXT("{")
+				TEXT("\"id\": \"file\",")
+				TEXT("\"value\" : \"File\",")
+				TEXT("\"popup\" :")
+				TEXT("{")
+				TEXT("\"menuitem\":")
+				TEXT("[")
+					TEXT("{\"value\": \"New\", \"onclick\" : \"CreateNewDoc()\"},")
+					TEXT("{ \"value\": \"Open\", \"onclick\" : \"OpenDoc()\" },")
+					TEXT("{ \"value\": \"Close\", \"onclick\" : \"CloseDoc()\" }")
+				TEXT("]")
+				TEXT("}")
+			TEXT("}")
+		TEXT("}");
+
+		EEasyJsonParserErrorCode result;
+		auto rootObject = UEasyJsonParseManager::LoadFromString(jsonString, result);
+
+		TestEqual(TEXT("failed load"), result, EEasyJsonParserErrorCode::Failed);
+
+	}
+
+	{
+		FString jsonString =
+			TEXT("{\"menu\":")
+				TEXT("{")
+					TEXT("\"id\": \"file\",")
+					TEXT("\"value\" : \"File\",")
+					TEXT("\"popup\" :")
+					TEXT("{")
+					TEXT("\"menuitem\":")
+					TEXT("[")
+						TEXT("{\"value\": \"New\", \"onclick\" : \"CreateNewDoc()\"},")
+						TEXT("{ \"value\": \"Open\", \"onclick\" : \"OpenDoc()\" },")
+						TEXT("{ \"value\": \"Close\", \"onclick\" : \"CloseDoc()\" }")
+					TEXT("]")
+					TEXT("}")
+				TEXT("}")
+			TEXT("}");
+
+		EEasyJsonParserErrorCode result;
+		auto rootObject = UEasyJsonParseManager::LoadFromString(jsonString, result);
+
+		TestEqual(TEXT("success load"), result, EEasyJsonParserErrorCode::Successed);
+
+		TestEqual(TEXT("failed read"), rootObject->ReadString(TEXT("menu")), TEXT(""));
+		TestEqual(TEXT("failed read"), rootObject->ReadString(TEXT("menu[1]")), TEXT(""));
+		TestEqual(TEXT("failed read"), rootObject->ReadString(TEXT("menu.name")), TEXT(""));
+		TestEqual(TEXT("failed read"), rootObject->ReadString(TEXT("menu.menuitem")), TEXT(""));
+		TestEqual(TEXT("failed read"), rootObject->ReadString(TEXT("menu.menuitem[3].value")), TEXT(""));
+
+	}
 
 	return true;
 }
