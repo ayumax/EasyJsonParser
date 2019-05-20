@@ -3,23 +3,22 @@
 #include "EasyJsonParseManager.h"
 #include "Misc/Paths.h"
 #include "Misc/FileHelper.h"
-#include "EasyJsonElement.h"
-#include "Utils/CustomJsonParser.h"
+#include "EasyJsonObject.h"
+#include "Utils/EasyJsonObjectMaker.h"
 
 
-UEasyJsonElement* UEasyJsonParseManager::LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result, FString& ErrorMessage)
+UEasyJsonObject* UEasyJsonParseManager::LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result)
 {
-	CustomJsonParser parser;
+	EasyJsonObjectMaker objectMaker;
 	FString _errorMessage;
 
-	auto rootElement = parser.Parse(JsonString, _errorMessage);
+	auto rootElement = objectMaker.Parse(JsonString, _errorMessage);
 	Result = rootElement != nullptr ? EEasyJsonParserErrorCode::Successed : EEasyJsonParserErrorCode::Failed;
-	ErrorMessage = _errorMessage;
 
 	return rootElement;
 }
 
-UEasyJsonElement* UEasyJsonParseManager::LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result, FString& ErrorMessage)
+UEasyJsonObject* UEasyJsonParseManager::LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result)
 {
 	auto readPath = FilePath;
 	if (!IsAblolute)
@@ -33,5 +32,5 @@ UEasyJsonElement* UEasyJsonParseManager::LoadFromFile(const FString& FilePath, b
 
 	FFileHelper::LoadFileToString(JsonString, *readPath);
 
-	return LoadFromString(JsonString, Result, ErrorMessage);
+	return LoadFromString(JsonString, Result);
 }
