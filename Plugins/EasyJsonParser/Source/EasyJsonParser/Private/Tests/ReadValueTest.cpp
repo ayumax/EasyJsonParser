@@ -17,7 +17,7 @@ bool FReadValueTest_Int::RunTest(const FString& Parameters)
 
 		EEasyJsonParserErrorCode result;
 		FString errorMessage;
-		auto rootNode = UEasyXMLParseManager::LoadFromString(xmlString, result, errorMessage);
+		auto rootNode = UEasyJsonParseManager::LoadFromString(xmlString, result, errorMessage);
 		
 		TestEqual(TEXT("success read int"), rootNode->ReadInt(TEXT("root.abc"), 0), 123);*/
 	}
