@@ -38,8 +38,7 @@ public class EasyJsonParser : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"Json",
-				"JsonUtilities"
+				"Json"
 			}
 			);
 		
