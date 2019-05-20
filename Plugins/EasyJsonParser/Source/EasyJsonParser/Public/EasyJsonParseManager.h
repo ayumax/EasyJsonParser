@@ -3,7 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "EasyJsonElement.h"
+#include "EasyJsonObject.h"
 #include "EasyJsonParserEnums.h"
 #include "EasyJsonParseManager.generated.h"
 
@@ -11,7 +11,7 @@
  * 
  */
 UCLASS(BlueprintType, Blueprintable)
-class EASYJsonPARSER_API UEasyJsonParseManager : public UObject
+class EASYJSONPARSER_API UEasyJsonParseManager : public UObject
 {
 	GENERATED_BODY()
 
@@ -23,7 +23,7 @@ public:
 	 * @return Json object
 	 */
 	UFUNCTION(BlueprintCallable, Category = "EasyJsonParser", meta = (ExpandEnumAsExecs = "Result"))
-	static UEasyJsonElement* LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result, FString& ErrorMessage);
+	static UEasyJsonObject* LoadFromFile(const FString& FilePath, bool IsAblolute, EEasyJsonParserErrorCode& Result);
 
 	/**
 	 * load Json string
@@ -31,6 +31,6 @@ public:
 	 * @return Json object
 	 */
 	UFUNCTION(BlueprintCallable, Category = "EasyJsonParser", meta = (ExpandEnumAsExecs = "Result"))
-	static UEasyJsonElement* LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result, FString& ErrorMessage);
+	static UEasyJsonObject* LoadFromString(const FString& JsonString, EEasyJsonParserErrorCode& Result);
 
 };
