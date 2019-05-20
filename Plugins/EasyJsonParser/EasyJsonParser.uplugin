@@ -1,13 +1,13 @@
 {
 	"FileVersion": 3,
 	"Version": 1,
-	"VersionName": "1.0",
+	"VersionName": "1.0.0",
 	"FriendlyName": "EasyJsonParser",
 	"Description": "",
-	"Category": "Other",
+	"Category": "Programming",
 	"CreatedBy": "ayumax",
-	"CreatedByURL": "",
-	"DocsURL": "",
+	"CreatedByURL": "https://github.com/ayumax",
+	"DocsURL": "https://github.com/ayumax/EasyJsonParserSample",
 	"MarketplaceURL": "",
 	"SupportURL": "",
 	"CanContainContent": true,
@@ -17,7 +17,11 @@
 		{
 			"Name": "EasyJsonParser",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+      "WhitelistPlatforms": [
+        "Win64",
+        "Win32"
+      ]
 		}
 	]
 }
