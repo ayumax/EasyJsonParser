@@ -1,6 +1,7 @@
 // Copyright 2019 ayumax. All Rights Reserved.
 
 #include "EasyJsonValue.h"
+#include "EasyJsonObject.h"
 
 UEasyJsonValue* UEasyJsonValue::CreateEasyJsonValue(TSharedPtr<FJsonValue> JsonValue)
 {
@@ -68,4 +69,37 @@ bool UEasyJsonValue::GetBoolValue(bool DefaultValue)
 	}
 
 	return DefaultValue;
+}
+
+UEasyJsonObject* UEasyJsonValue::AsJsonObject()
+{
+	if (!InnerObject) return nullptr;
+	if (InnerObject->IsNull()) return nullptr;
+
+	const TSharedPtr<FJsonObject>* ObjectPtr;
+	if (InnerObject->TryGetObject(ObjectPtr))
+	{
+		return UEasyJsonObject::CreateEasyJsonObject(*ObjectPtr);
+	}
+
+	return nullptr;
+}
+
+TArray<UEasyJsonValue*> UEasyJsonValue::AsValueArray()
+{
+	TArray<UEasyJsonValue*> retArray;
+	if (!InnerObject) return retArray;
+	if (InnerObject->IsNull()) return retArray;
+
+	const TArray<TSharedPtr<FJsonValue>>* ArrayPtr;
+	if (InnerObject->TryGetArray(ArrayPtr))
+	{
+		TArray<TSharedPtr<FJsonValue>> SubArrayValue;
+		for (int32 index = 0; index < ArrayPtr->Num(); index++)
+		{
+			retArray.Add(UEasyJsonValue::CreateEasyJsonValue((*ArrayPtr)[index]));
+		}
+	}
+
+	return retArray;
 }
