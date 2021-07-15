@@ -36,6 +36,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "EasyJsonParser|ReadValue", meta = (ExpandEnumAsExecs = "Result"))
 	TArray<UEasyJsonObject*> ReadObjects(const FString& AccessString, EEasyJsonParserFound& Result);
 
+	UFUNCTION(BlueprintCallable, Category = "EasyJsonParser|ReadValue", meta = (ExpandEnumAsExecs = "Result"))
+	UEasyJsonValue* ReadJsonValue(const FString& AccessString, EEasyJsonParserFound& Result);
 
 
 public:

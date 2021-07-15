@@ -28,6 +28,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "EasyJsonParser|GetValue")
 	bool GetBoolValue(bool DefaultValue = false);
 
+	UFUNCTION(BlueprintPure, Category = "EasyJsonParser|GetValue")
+	UEasyJsonObject* AsJsonObject();
+
+	UFUNCTION(BlueprintPure, Category = "EasyJsonParser|GetValue")
+	TArray<UEasyJsonValue*> AsValueArray();
+
+
 private:
 	TSharedPtr<FJsonValue> InnerObject;
 
