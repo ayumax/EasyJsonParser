@@ -81,3 +81,8 @@ DerivedDataCache/*
 
 *.*~
 .idea
+
+*.DotSEttings.user
+
+Froola/results/*
+FRoola/packages/*
