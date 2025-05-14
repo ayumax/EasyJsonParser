@@ -8,7 +8,10 @@ public class EasyJsonParserTestTarget : TargetRules
 	public EasyJsonParserTestTarget(TargetInfo Target) : base(Target)
 	{
 		Type = TargetType.Game;
+		DefaultBuildSettings = BuildSettingsVersion.Latest;
+		IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
+		CppStandard = CppStandardVersion.Latest;
 
-		ExtraModuleNames.AddRange( new string[] { "EasyJsonParserTest" } );
+		ExtraModuleNames.Add("EasyJsonParserTest");
 	}
 }
