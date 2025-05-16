@@ -12,12 +12,12 @@ public class EasyJsonParser : ModuleRules
 
 		PublicDependencyModuleNames.Add("Core");
 		
-		PrivateDependencyModuleNames.AddRange([
+		PrivateDependencyModuleNames.AddRange(new string[]{
 			"CoreUObject",
 			"Engine",
 			"Slate",
 			"SlateCore",
 			"Json"
-		]);
+		});
 	}
 }
