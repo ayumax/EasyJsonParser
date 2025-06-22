@@ -1,0 +1,12 @@
+{
+	"test":
+	{
+		"name": "FileWriteTest",
+		"value": 42,
+		"success": true,
+		"tags": [
+			"automation",
+			"testing"
+		]
+	}
+}
