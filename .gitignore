@@ -85,7 +85,8 @@ DerivedDataCache/*
 *.DotSEttings.user
 
 Froola/results/*
-FRoola/packages/*
+Froola/packages/*
+Froola/pa/*
 
 CLAUDE.md
 .tasks/*
