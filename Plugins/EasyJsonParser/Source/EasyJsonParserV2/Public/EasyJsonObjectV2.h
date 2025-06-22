@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Dom/JsonObject.h"
 #include "EasyJsonValueV2.h"
+#include "AdvancedAccessParser.h"
 #include "EasyJsonObjectV2.generated.h"
 
 USTRUCT(BlueprintType)
@@ -49,6 +50,29 @@ public:
 	void AddBoolToArray(const FString& AccessString, bool Value);
 	void AddObjectToArray(const FString& AccessString, const FEasyJsonObjectV2& Object);
 
+	// Advanced array access methods
+	int32 GetArraySize(const FString& AccessString) const;
+	bool IsArray(const FString& AccessString) const;
+	FEasyJsonValueV2 SafeReadArrayElement(const FString& AccessString, int32 Index) const;
+	TArray<FEasyJsonValueV2> ReadArrayValues(const FString& AccessString) const;
+	int32 GetArrayDimensions(const FString& AccessString) const;
+	TArray<int32> GetArrayDimensionSizes(const FString& AccessString) const;
+
+	// 2D array access methods
+	int32 Read2DArrayInt(const FString& ArrayPath, int32 Row, int32 Col, int32 DefaultValue = 0) const;
+	float Read2DArrayFloat(const FString& ArrayPath, int32 Row, int32 Col, float DefaultValue = 0.0f) const;
+	FString Read2DArrayString(const FString& ArrayPath, int32 Row, int32 Col, const FString& DefaultValue = TEXT("")) const;
+	bool Read2DArrayBool(const FString& ArrayPath, int32 Row, int32 Col, bool DefaultValue = false) const;
+
+	// 3D array access methods
+	int32 Read3DArrayInt(const FString& ArrayPath, int32 X, int32 Y, int32 Z, int32 DefaultValue = 0) const;
+	float Read3DArrayFloat(const FString& ArrayPath, int32 X, int32 Y, int32 Z, float DefaultValue = 0.0f) const;
+	FString Read3DArrayString(const FString& ArrayPath, int32 X, int32 Y, int32 Z, const FString& DefaultValue = TEXT("")) const;
+	bool Read3DArrayBool(const FString& ArrayPath, int32 X, int32 Y, int32 Z, bool DefaultValue = false) const;
+
+	// Multi-dimensional array access
+	FEasyJsonValueV2 ReadMultiDimensionalArray(const FString& ArrayPath, const TArray<int32>& Indices) const;
+
 	// Static creation methods
 	static FEasyJsonObjectV2 CreateEmpty();
 	static FEasyJsonObjectV2 CreateFromString(const FString& JsonString, bool& bSuccess);
@@ -78,4 +102,9 @@ private:
 	
 	// Helper method for adding values to arrays
 	void AddToArrayInternal(const FString& AccessString, TSharedPtr<FJsonValue> NewValue, const FString& TypeName, const FString& ValueString);
+
+	// Advanced access methods using new parser
+	FEasyJsonValueV2 ReadEasyJsonValueAdvanced(const FString& AccessString) const;
+	TSharedPtr<FJsonValue> NavigateToValue(const TArray<FAccessStep>& Steps) const;
+	TSharedPtr<FJsonValue> NavigateToArrayElement(TSharedPtr<FJsonValue> ArrayValue, const TArray<int32>& Indices) const;
 };

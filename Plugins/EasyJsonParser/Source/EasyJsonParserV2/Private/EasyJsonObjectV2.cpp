@@ -2,6 +2,7 @@
 
 #include "EasyJsonObjectV2.h"
 #include "EasyJsonParserV2Debug.h"
+#include "AdvancedAccessParser.h"
 #include "Internationalization/Regex.h"
 #include "Dom/JsonValue.h"
 #include "Serialization/JsonSerializer.h"
@@ -453,6 +454,14 @@ FEasyJsonValueV2 FEasyJsonObjectV2::ReadEasyJsonValue(const FString& AccessStrin
 		return FEasyJsonValueV2();
 	}
 	
+	// Check if this contains multi-dimensional array access
+	if (FAdvancedAccessParser::ContainsArrayAccess(AccessString) && 
+		FAdvancedAccessParser::GetMaxArrayDepth(AccessString) > 1)
+	{
+		// Use advanced parser for multi-dimensional arrays
+		return ReadEasyJsonValueAdvanced(AccessString);
+	}
+	
 	TArray<FString> Accessers;
 	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
 	
@@ -780,4 +789,347 @@ TSharedPtr<FJsonValue> FEasyJsonObjectV2::CreateValue(const FString& AccessStrin
 		EASYJSON_DEBUG_SUCCESS(TEXT("CreateValue"), FString::Printf(TEXT("Successfully set property '%s'"), *PropertyName));
 		return NewValue;
 	}
+}
+
+// Advanced array access methods implementation
+
+int32 FEasyJsonObjectV2::GetArraySize(const FString& AccessString) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("GetArraySize(%s)"), *AccessString));
+	
+	FEasyJsonValueV2 ArrayValue = ReadEasyJsonValueAdvanced(AccessString);
+	if (!ArrayValue.IsValid() || !ArrayValue.IsArray())
+	{
+		EASYJSON_DEBUG_ERROR(AccessString, TEXT("NotAnArray"), TEXT("Path does not point to a valid array"));
+		return 0;
+	}
+	
+	const TArray<TSharedPtr<FJsonValue>>* Array;
+	if (ArrayValue.GetJsonValue()->TryGetArray(Array))
+	{
+		int32 Size = Array->Num();
+		EASYJSON_DEBUG_SUCCESS(TEXT("GetArraySize"), FString::Printf(TEXT("Array size: %d"), Size));
+		return Size;
+	}
+	
+	return 0;
+}
+
+bool FEasyJsonObjectV2::IsArray(const FString& AccessString) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("IsArray(%s)"), *AccessString));
+	
+	FEasyJsonValueV2 Value = ReadEasyJsonValueAdvanced(AccessString);
+	bool bIsArray = Value.IsValid() && Value.IsArray();
+	
+	EASYJSON_DEBUG_SUCCESS(TEXT("IsArray"), FString::Printf(TEXT("Is array: %s"), bIsArray ? TEXT("true") : TEXT("false")));
+	return bIsArray;
+}
+
+FEasyJsonValueV2 FEasyJsonObjectV2::SafeReadArrayElement(const FString& AccessString, int32 Index) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("SafeReadArrayElement(%s, %d)"), *AccessString, Index));
+	
+	FEasyJsonValueV2 ArrayValue = ReadEasyJsonValueAdvanced(AccessString);
+	if (!ArrayValue.IsValid() || !ArrayValue.IsArray())
+	{
+		EASYJSON_DEBUG_ERROR(AccessString, TEXT("NotAnArray"), TEXT("Path does not point to a valid array"));
+		return FEasyJsonValueV2();
+	}
+	
+	const TArray<TSharedPtr<FJsonValue>>* Array;
+	if (ArrayValue.GetJsonValue()->TryGetArray(Array))
+	{
+		if (Index >= 0 && Index < Array->Num())
+		{
+			EASYJSON_DEBUG_SUCCESS(TEXT("SafeReadArrayElement"), FString::Printf(TEXT("Found element at index %d"), Index));
+			return FEasyJsonValueV2((*Array)[Index]);
+		}
+		else
+		{
+			EASYJSON_DEBUG_ERROR(AccessString, TEXT("IndexOutOfBounds"), FString::Printf(TEXT("Index %d is out of bounds (array size: %d)"), Index, Array->Num()));
+		}
+	}
+	
+	return FEasyJsonValueV2();
+}
+
+TArray<FEasyJsonValueV2> FEasyJsonObjectV2::ReadArrayValues(const FString& AccessString) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("ReadArrayValues(%s)"), *AccessString));
+	
+	TArray<FEasyJsonValueV2> Result;
+	
+	FEasyJsonValueV2 ArrayValue = ReadEasyJsonValueAdvanced(AccessString);
+	if (!ArrayValue.IsValid() || !ArrayValue.IsArray())
+	{
+		EASYJSON_DEBUG_ERROR(AccessString, TEXT("NotAnArray"), TEXT("Path does not point to a valid array"));
+		return Result;
+	}
+	
+	const TArray<TSharedPtr<FJsonValue>>* Array;
+	if (ArrayValue.GetJsonValue()->TryGetArray(Array))
+	{
+		for (const TSharedPtr<FJsonValue>& Element : *Array)
+		{
+			Result.Add(FEasyJsonValueV2(Element));
+		}
+		
+		EASYJSON_DEBUG_SUCCESS(TEXT("ReadArrayValues"), FString::Printf(TEXT("Read %d array elements"), Result.Num()));
+	}
+	
+	return Result;
+}
+
+int32 FEasyJsonObjectV2::GetArrayDimensions(const FString& AccessString) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("GetArrayDimensions(%s)"), *AccessString));
+	
+	// Use the advanced parser to analyze the maximum array depth
+	int32 Dimensions = FAdvancedAccessParser::GetMaxArrayDepth(AccessString);
+	
+	// If no array access in the string, check if the target is an array
+	if (Dimensions == 0)
+	{
+		if (IsArray(AccessString))
+		{
+			Dimensions = 1;
+		}
+	}
+	
+	EASYJSON_DEBUG_SUCCESS(TEXT("GetArrayDimensions"), FString::Printf(TEXT("Array dimensions: %d"), Dimensions));
+	return Dimensions;
+}
+
+TArray<int32> FEasyJsonObjectV2::GetArrayDimensionSizes(const FString& AccessString) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("GetArrayDimensionSizes(%s)"), *AccessString));
+	
+	TArray<int32> DimensionSizes;
+	
+	// Start with the base array
+	FString CurrentPath = AccessString;
+	int32 CurrentSize = GetArraySize(CurrentPath);
+	
+	if (CurrentSize > 0)
+	{
+		DimensionSizes.Add(CurrentSize);
+		
+		// Check first element for nested arrays
+		FString FirstElementPath = CurrentPath + TEXT("[0]");
+		while (IsArray(FirstElementPath))
+		{
+			int32 NestedSize = GetArraySize(FirstElementPath);
+			if (NestedSize > 0)
+			{
+				DimensionSizes.Add(NestedSize);
+				FirstElementPath += TEXT("[0]");
+			}
+			else
+			{
+				break;
+			}
+		}
+	}
+	
+	EASYJSON_DEBUG_SUCCESS(TEXT("GetArrayDimensionSizes"), FString::Printf(TEXT("Found %d dimensions"), DimensionSizes.Num()));
+	return DimensionSizes;
+}
+
+// 2D array access methods
+
+int32 FEasyJsonObjectV2::Read2DArrayInt(const FString& ArrayPath, int32 Row, int32 Col, int32 DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read2DArrayInt(%s, %d, %d)"), *ArrayPath, Row, Col));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d]"), *ArrayPath, Row, Col);
+	return ReadInt(AccessString, DefaultValue);
+}
+
+float FEasyJsonObjectV2::Read2DArrayFloat(const FString& ArrayPath, int32 Row, int32 Col, float DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read2DArrayFloat(%s, %d, %d)"), *ArrayPath, Row, Col));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d]"), *ArrayPath, Row, Col);
+	return ReadFloat(AccessString, DefaultValue);
+}
+
+FString FEasyJsonObjectV2::Read2DArrayString(const FString& ArrayPath, int32 Row, int32 Col, const FString& DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read2DArrayString(%s, %d, %d)"), *ArrayPath, Row, Col));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d]"), *ArrayPath, Row, Col);
+	return ReadString(AccessString, DefaultValue);
+}
+
+bool FEasyJsonObjectV2::Read2DArrayBool(const FString& ArrayPath, int32 Row, int32 Col, bool DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read2DArrayBool(%s, %d, %d)"), *ArrayPath, Row, Col));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d]"), *ArrayPath, Row, Col);
+	return ReadBool(AccessString, DefaultValue);
+}
+
+// 3D array access methods
+
+int32 FEasyJsonObjectV2::Read3DArrayInt(const FString& ArrayPath, int32 X, int32 Y, int32 Z, int32 DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read3DArrayInt(%s, %d, %d, %d)"), *ArrayPath, X, Y, Z));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d][%d]"), *ArrayPath, X, Y, Z);
+	return ReadInt(AccessString, DefaultValue);
+}
+
+float FEasyJsonObjectV2::Read3DArrayFloat(const FString& ArrayPath, int32 X, int32 Y, int32 Z, float DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read3DArrayFloat(%s, %d, %d, %d)"), *ArrayPath, X, Y, Z));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d][%d]"), *ArrayPath, X, Y, Z);
+	return ReadFloat(AccessString, DefaultValue);
+}
+
+FString FEasyJsonObjectV2::Read3DArrayString(const FString& ArrayPath, int32 X, int32 Y, int32 Z, const FString& DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read3DArrayString(%s, %d, %d, %d)"), *ArrayPath, X, Y, Z));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d][%d]"), *ArrayPath, X, Y, Z);
+	return ReadString(AccessString, DefaultValue);
+}
+
+bool FEasyJsonObjectV2::Read3DArrayBool(const FString& ArrayPath, int32 X, int32 Y, int32 Z, bool DefaultValue) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("Read3DArrayBool(%s, %d, %d, %d)"), *ArrayPath, X, Y, Z));
+	
+	FString AccessString = FString::Printf(TEXT("%s[%d][%d][%d]"), *ArrayPath, X, Y, Z);
+	return ReadBool(AccessString, DefaultValue);
+}
+
+// Multi-dimensional array access
+
+FEasyJsonValueV2 FEasyJsonObjectV2::ReadMultiDimensionalArray(const FString& ArrayPath, const TArray<int32>& Indices) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("ReadMultiDimensionalArray(%s, %d indices)"), *ArrayPath, Indices.Num()));
+	
+	FString AccessString = ArrayPath;
+	for (int32 Index : Indices)
+	{
+		AccessString += FString::Printf(TEXT("[%d]"), Index);
+	}
+	
+	return ReadEasyJsonValueAdvanced(AccessString);
+}
+
+// Advanced access methods using new parser
+
+FEasyJsonValueV2 FEasyJsonObjectV2::ReadEasyJsonValueAdvanced(const FString& AccessString) const
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("ReadEasyJsonValueAdvanced(%s)"), *AccessString));
+	
+	if (!IsValid())
+	{
+		EASYJSON_DEBUG_ERROR(AccessString, TEXT("InvalidObject"), TEXT("JSON object is not valid"));
+		return FEasyJsonValueV2();
+	}
+	
+	// Use the advanced parser for complex array access
+	TArray<FAccessStep> Steps = FAdvancedAccessParser::ParseAccessString(AccessString);
+	if (Steps.Num() == 0)
+	{
+		EASYJSON_DEBUG_ERROR(AccessString, TEXT("ParseFailed"), TEXT("Failed to parse access string"));
+		return FEasyJsonValueV2();
+	}
+	
+	TSharedPtr<FJsonValue> Value = NavigateToValue(Steps);
+	if (Value.IsValid())
+	{
+		EASYJSON_DEBUG_SUCCESS(TEXT("ReadEasyJsonValueAdvanced"), TEXT("Successfully navigated to value"));
+		return FEasyJsonValueV2(Value);
+	}
+	
+	EASYJSON_DEBUG_ERROR(AccessString, TEXT("NavigationFailed"), TEXT("Failed to navigate to specified path"));
+	return FEasyJsonValueV2();
+}
+
+TSharedPtr<FJsonValue> FEasyJsonObjectV2::NavigateToValue(const TArray<FAccessStep>& Steps) const
+{
+	TSharedPtr<FJsonObject> CurrentObject = InnerObject;
+	TSharedPtr<FJsonValue> CurrentValue;
+	
+	for (int32 StepIndex = 0; StepIndex < Steps.Num(); StepIndex++)
+	{
+		const FAccessStep& Step = Steps[StepIndex];
+		
+		if (!CurrentObject.IsValid())
+		{
+			return nullptr;
+		}
+		
+		// Get the property value
+		CurrentValue = CurrentObject->TryGetField(Step.PropertyName);
+		if (!CurrentValue.IsValid())
+		{
+			return nullptr;
+		}
+		
+		// Handle array indices if present
+		if (Step.bIsArrayAccess && Step.ArrayIndices.Num() > 0)
+		{
+			CurrentValue = NavigateToArrayElement(CurrentValue, Step.ArrayIndices);
+			if (!CurrentValue.IsValid())
+			{
+				return nullptr;
+			}
+		}
+		
+		// If this is the last step, return the value
+		if (StepIndex == Steps.Num() - 1)
+		{
+			return CurrentValue;
+		}
+		
+		// Otherwise, the value should be an object for the next step
+		const TSharedPtr<FJsonObject>* NextObject;
+		if (CurrentValue->TryGetObject(NextObject))
+		{
+			CurrentObject = *NextObject;
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+	
+	return CurrentValue;
+}
+
+TSharedPtr<FJsonValue> FEasyJsonObjectV2::NavigateToArrayElement(TSharedPtr<FJsonValue> ArrayValue, const TArray<int32>& Indices) const
+{
+	TSharedPtr<FJsonValue> CurrentValue = ArrayValue;
+	
+	for (int32 Index : Indices)
+	{
+		if (!CurrentValue.IsValid())
+		{
+			return nullptr;
+		}
+		
+		const TArray<TSharedPtr<FJsonValue>>* Array;
+		if (CurrentValue->TryGetArray(Array))
+		{
+			if (Index >= 0 && Index < Array->Num())
+			{
+				CurrentValue = (*Array)[Index];
+			}
+			else
+			{
+				return nullptr;
+			}
+		}
+		else
+		{
+			return nullptr;
+		}
+	}
+	
+	return CurrentValue;
 }
