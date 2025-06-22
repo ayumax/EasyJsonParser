@@ -1,7 +1,7 @@
 // Copyright 2025 ayumax. All Rights Reserved.
 
 #include "EasyJsonParseManagerV2.h"
-#include "HAL/PlatformFilemanager.h"
+#include "HAL/PlatformFileManager.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
