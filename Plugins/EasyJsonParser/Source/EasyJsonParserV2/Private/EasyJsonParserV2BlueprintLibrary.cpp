@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2025 ayumax. All Rights Reserved.
 
 #include "EasyJsonParserV2BlueprintLibrary.h"
 #include "EasyJsonParseManagerV2.h"
