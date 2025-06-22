@@ -75,4 +75,7 @@ private:
 	void GetObject(const TSharedPtr<FJsonObject> TargetObject, const FString& PropertyName, TArray<TSharedPtr<FJsonObject>>& Objects) const;
 	TSharedPtr<FJsonObject> CreateOrGetObject(const FString& AccessString);
 	TSharedPtr<FJsonValue> CreateValue(const FString& AccessString, TSharedPtr<FJsonValue> NewValue);
+	
+	// Helper method for adding values to arrays
+	void AddToArrayInternal(const FString& AccessString, TSharedPtr<FJsonValue> NewValue, const FString& TypeName, const FString& ValueString);
 };

@@ -254,10 +254,8 @@ void FEasyJsonObjectV2::WriteObject(const FString& AccessString, const FEasyJson
 	}
 }
 
-void FEasyJsonObjectV2::AddIntToArray(const FString& AccessString, int32 Value)
+void FEasyJsonObjectV2::AddToArrayInternal(const FString& AccessString, TSharedPtr<FJsonValue> NewValue, const FString& TypeName, const FString& ValueString)
 {
-	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("AddIntToArray(%s, %d)"), *AccessString, Value));
-	
 	if (!IsValid())
 	{
 		InnerObject = MakeShareable(new FJsonObject());
@@ -272,12 +270,9 @@ void FEasyJsonObjectV2::AddIntToArray(const FString& AccessString, int32 Value)
 	}
 	
 	const FString& FinalAccessor = Accessers.Last();
-	// For AddIntToArray, the final accessor should be the array property name
-	// (no array index notation expected)
 	FString ArrayPropertyName = FinalAccessor;
 	
-	// Get the parent object - for "numbers" this should be the root object
-	// for "user.numbers" this should be the "user" object
+	// Get the parent object
 	TSharedPtr<FJsonObject> ParentObject;
 	if (Accessers.Num() == 1)
 	{
@@ -309,10 +304,17 @@ void FEasyJsonObjectV2::AddIntToArray(const FString& AccessString, int32 Value)
 	}
 	
 	// Add the new value
-	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueNumber(static_cast<double>(Value)));
 	ModifiedArray.Add(NewValue);
 	
 	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
+}
+
+void FEasyJsonObjectV2::AddIntToArray(const FString& AccessString, int32 Value)
+{
+	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("AddIntToArray(%s, %d)"), *AccessString, Value));
+	
+	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueNumber(static_cast<double>(Value)));
+	AddToArrayInternal(AccessString, NewValue, TEXT("Int"), FString::Printf(TEXT("%d"), Value));
 	
 	EASYJSON_DEBUG_SUCCESS(TEXT("AddIntToArray"), FString::Printf(TEXT("Added value %d to array '%s'"), Value, *AccessString));
 }
@@ -321,61 +323,8 @@ void FEasyJsonObjectV2::AddFloatToArray(const FString& AccessString, float Value
 {
 	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("AddFloatToArray(%s, %f)"), *AccessString, Value));
 	
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
-	TArray<FString> Accessers;
-	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
-	
-	if (Accessers.Num() == 0)
-	{
-		return;
-	}
-	
-	const FString& FinalAccessor = Accessers.Last();
-	// For AddFloatToArray, the final accessor should be the array property name
-	// (no array index notation expected)
-	FString ArrayPropertyName = FinalAccessor;
-	
-	// Get the parent object - for "numbers" this should be the root object
-	// for "user.numbers" this should be the "user" object
-	TSharedPtr<FJsonObject> ParentObject;
-	if (Accessers.Num() == 1)
-	{
-		// Direct property on root object
-		ParentObject = InnerObject;
-	}
-	else
-	{
-		// Nested property - get parent path
-		TArray<FString> ParentAccessers = Accessers;
-		ParentAccessers.RemoveAt(ParentAccessers.Num() - 1);
-		FString ParentPath = FString::Join(ParentAccessers, TEXT("."));
-		ParentObject = CreateOrGetObject(ParentPath);
-	}
-	
-	if (!ParentObject.IsValid())
-	{
-		EASYJSON_DEBUG_ERROR(AccessString, TEXT("PathCreationFailed"), TEXT("Could not create or get parent object"));
-		return;
-	}
-	
-	// Get existing array or create new one
-	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
-	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
-	
-	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
-	{
-		ModifiedArray = *ExistingArray;
-	}
-	
-	// Add the new value
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueNumber(static_cast<double>(Value)));
-	ModifiedArray.Add(NewValue);
-	
-	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
+	AddToArrayInternal(AccessString, NewValue, TEXT("Float"), FString::Printf(TEXT("%f"), Value));
 	
 	EASYJSON_DEBUG_SUCCESS(TEXT("AddFloatToArray"), FString::Printf(TEXT("Added value %f to array '%s'"), Value, *AccessString));
 }
@@ -384,61 +333,8 @@ void FEasyJsonObjectV2::AddStringToArray(const FString& AccessString, const FStr
 {
 	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("AddStringToArray(%s, '%s')"), *AccessString, *Value));
 	
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
-	TArray<FString> Accessers;
-	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
-	
-	if (Accessers.Num() == 0)
-	{
-		return;
-	}
-	
-	const FString& FinalAccessor = Accessers.Last();
-	// For AddStringToArray, the final accessor should be the array property name
-	// (no array index notation expected)
-	FString ArrayPropertyName = FinalAccessor;
-	
-	// Get the parent object - for "numbers" this should be the root object
-	// for "user.numbers" this should be the "user" object
-	TSharedPtr<FJsonObject> ParentObject;
-	if (Accessers.Num() == 1)
-	{
-		// Direct property on root object
-		ParentObject = InnerObject;
-	}
-	else
-	{
-		// Nested property - get parent path
-		TArray<FString> ParentAccessers = Accessers;
-		ParentAccessers.RemoveAt(ParentAccessers.Num() - 1);
-		FString ParentPath = FString::Join(ParentAccessers, TEXT("."));
-		ParentObject = CreateOrGetObject(ParentPath);
-	}
-	
-	if (!ParentObject.IsValid())
-	{
-		EASYJSON_DEBUG_ERROR(AccessString, TEXT("PathCreationFailed"), TEXT("Could not create or get parent object"));
-		return;
-	}
-	
-	// Get existing array or create new one
-	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
-	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
-	
-	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
-	{
-		ModifiedArray = *ExistingArray;
-	}
-	
-	// Add the new value
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueString(Value));
-	ModifiedArray.Add(NewValue);
-	
-	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
+	AddToArrayInternal(AccessString, NewValue, TEXT("String"), FString::Printf(TEXT("'%s'"), *Value));
 	
 	EASYJSON_DEBUG_SUCCESS(TEXT("AddStringToArray"), FString::Printf(TEXT("Added value '%s' to array '%s'"), *Value, *AccessString));
 }
@@ -447,61 +343,8 @@ void FEasyJsonObjectV2::AddBoolToArray(const FString& AccessString, bool Value)
 {
 	EASYJSON_DEBUG_SCOPE(FString::Printf(TEXT("AddBoolToArray(%s, %s)"), *AccessString, Value ? TEXT("true") : TEXT("false")));
 	
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
-	TArray<FString> Accessers;
-	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
-	
-	if (Accessers.Num() == 0)
-	{
-		return;
-	}
-	
-	const FString& FinalAccessor = Accessers.Last();
-	// For AddBoolToArray, the final accessor should be the array property name
-	// (no array index notation expected)
-	FString ArrayPropertyName = FinalAccessor;
-	
-	// Get the parent object - for "numbers" this should be the root object
-	// for "user.numbers" this should be the "user" object
-	TSharedPtr<FJsonObject> ParentObject;
-	if (Accessers.Num() == 1)
-	{
-		// Direct property on root object
-		ParentObject = InnerObject;
-	}
-	else
-	{
-		// Nested property - get parent path
-		TArray<FString> ParentAccessers = Accessers;
-		ParentAccessers.RemoveAt(ParentAccessers.Num() - 1);
-		FString ParentPath = FString::Join(ParentAccessers, TEXT("."));
-		ParentObject = CreateOrGetObject(ParentPath);
-	}
-	
-	if (!ParentObject.IsValid())
-	{
-		EASYJSON_DEBUG_ERROR(AccessString, TEXT("PathCreationFailed"), TEXT("Could not create or get parent object"));
-		return;
-	}
-	
-	// Get existing array or create new one
-	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
-	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
-	
-	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
-	{
-		ModifiedArray = *ExistingArray;
-	}
-	
-	// Add the new value
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueBoolean(Value));
-	ModifiedArray.Add(NewValue);
-	
-	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
+	AddToArrayInternal(AccessString, NewValue, TEXT("Bool"), Value ? TEXT("true") : TEXT("false"));
 	
 	EASYJSON_DEBUG_SUCCESS(TEXT("AddBoolToArray"), FString::Printf(TEXT("Added value %s to array '%s'"), Value ? TEXT("true") : TEXT("false"), *AccessString));
 }
@@ -516,61 +359,8 @@ void FEasyJsonObjectV2::AddObjectToArray(const FString& AccessString, const FEas
 		return;
 	}
 	
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
-	TArray<FString> Accessers;
-	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
-	
-	if (Accessers.Num() == 0)
-	{
-		return;
-	}
-	
-	const FString& FinalAccessor = Accessers.Last();
-	// For AddObjectToArray, the final accessor should be the array property name
-	// (no array index notation expected)
-	FString ArrayPropertyName = FinalAccessor;
-	
-	// Get the parent object - for "numbers" this should be the root object
-	// for "user.numbers" this should be the "user" object
-	TSharedPtr<FJsonObject> ParentObject;
-	if (Accessers.Num() == 1)
-	{
-		// Direct property on root object
-		ParentObject = InnerObject;
-	}
-	else
-	{
-		// Nested property - get parent path
-		TArray<FString> ParentAccessers = Accessers;
-		ParentAccessers.RemoveAt(ParentAccessers.Num() - 1);
-		FString ParentPath = FString::Join(ParentAccessers, TEXT("."));
-		ParentObject = CreateOrGetObject(ParentPath);
-	}
-	
-	if (!ParentObject.IsValid())
-	{
-		EASYJSON_DEBUG_ERROR(AccessString, TEXT("PathCreationFailed"), TEXT("Could not create or get parent object"));
-		return;
-	}
-	
-	// Get existing array or create new one
-	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
-	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
-	
-	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
-	{
-		ModifiedArray = *ExistingArray;
-	}
-	
-	// Add the new value
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueObject(Object.InnerObject));
-	ModifiedArray.Add(NewValue);
-	
-	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
+	AddToArrayInternal(AccessString, NewValue, TEXT("Object"), TEXT("object"));
 	
 	EASYJSON_DEBUG_SUCCESS(TEXT("AddObjectToArray"), FString::Printf(TEXT("Added object to array '%s'"), *AccessString));
 }
