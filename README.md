@@ -5,7 +5,15 @@
 [https://www.fab.com/ja/listings/0f13d0ef-a6fe-411c-8c57-9cc0f694b3f0](https://www.fab.com/ja/listings/0f13d0ef-a6fe-411c-8c57-9cc0f694b3f0)
 
 ## Description
-EasyJsonParser is a powerful and user-friendly JSON parsing plugin for Unreal Engine that provides simple JSON parsing functionality with an intuitive dot-notation access pattern. The plugin supports UE 5.3 through 5.6.
+EasyJsonParser is a powerful and user-friendly JSON parsing plugin for Unreal Engine that provides simple JSON parsing functionality with an intuitive dot-notation access pattern.
+
+## Version Support Policy
+This repository supports the latest 3 versions of Unreal Engine. Currently supported versions:
+- **UE 5.4** - Minimum supported version
+- **UE 5.5** - Fully supported  
+- **UE 5.6** - Latest supported version
+
+When new UE versions are released, older versions will be phased out to maintain focus on the most current engine features and improvements.
 
 ### 🎉 Version 2.0 Now Available!
 EasyJsonParser V2 brings significant improvements while maintaining full backward compatibility with V1. Existing users can continue using V1 and migrate to V2 at their own pace.
