@@ -8,46 +8,46 @@
 DECLARE_LOG_CATEGORY_EXTERN(LogEasyJsonParserV2, Log, All);
 
 /**
- * デバッグログ出力システム
+ * Debug log output system
  */
 class EASYJSONPARSERV2_API FEasyJsonV2DebugLogger
 {
 public:
-	// 操作ログの出力
+	// Output operation logs
 	static void LogOperation(const FString& Operation, const FString& Result, const FString& Message);
 	
-	// 詳細情報の出力
+	// Output detailed information
 	static void LogDetail(const FString& DetailMessage, int32 IndentLevel = 1);
 	
-	// エラー情報の出力
+	// Output error information
 	static void LogError(const FString& AccessString, const FString& ErrorType, const FString& Suggestion);
 	
-	// パフォーマンス情報の出力
+	// Output performance information
 	static void LogPerformance(const FString& Operation, float ElapsedTime);
 	
-	// 成功情報の出力
+	// Output success information
 	static void LogSuccess(const FString& Operation, const FString& Details = FString());
 	
-	// アクセス文字列解析の詳細ログ
+	// Detailed log of access string parsing
 	static void LogAccessParsing(const FString& AccessString, const TArray<FString>& ParsedSteps);
 
-	// デバッグモード有効チェック
+	// Check if debug mode is enabled
 	static bool IsDebugEnabled();
 	
-	// 現在のログレベル取得
+	// Get current log level
 	static EEasyJsonParserV2DebugLogLevel GetLogLevel();
 
 private:
 	
-	// ログメッセージのフォーマット
+	// Format log messages
 	static FString FormatLogMessage(const FString& Category, const FString& Level, const FString& Message);
 	
-	// インデント用文字列生成
+	// Generate string for indentation
 	static FString GetIndentString(int32 IndentLevel);
 };
 
 /**
- * パフォーマンス測定用のスコープクラス
+ * Scope class for performance measurement
  */
 class EASYJSONPARSERV2_API FEasyJsonV2DebugScope
 {
@@ -55,7 +55,7 @@ public:
 	FEasyJsonV2DebugScope(const FString& OperationName);
 	~FEasyJsonV2DebugScope();
 	
-	// 中間時点でのタイム記録
+	// Record time at intermediate points
 	void LogCheckpoint(const FString& CheckpointName);
 
 private:
@@ -64,7 +64,7 @@ private:
 	TArray<TPair<FString, double>> Checkpoints;
 };
 
-// デバッグモード用マクロ
+// Macros for debug mode
 #define EASYJSON_DEBUG_SCOPE(OperationName) \
 	FEasyJsonV2DebugScope DebugScope(OperationName)
 
@@ -77,18 +77,18 @@ private:
 #define EASYJSON_DEBUG_SUCCESS(Operation, Details) \
 	FEasyJsonV2DebugLogger::LogSuccess(Operation, Details)
 
-// デバッグモード制御用のグローバル関数
+// Global functions for debug mode control
 namespace EasyJsonParserV2Debug
 {
-	// デバッグモードの有効/無効切り替え
+	// Enable/disable debug mode
 	EASYJSONPARSERV2_API void SetDebugEnabled(bool bEnabled);
 	
-	// 現在のデバッグモード状態を取得
+	// Get current debug mode status
 	EASYJSONPARSERV2_API bool IsDebugEnabled();
 	
-	// デバッグログレベル設定
+	// Set debug log level
 	EASYJSONPARSERV2_API void SetDebugLogLevel(EEasyJsonParserV2DebugLogLevel LogLevel);
 	
-	// 現在のデバッグログレベルを取得
+	// Get current debug log level
 	EASYJSONPARSERV2_API EEasyJsonParserV2DebugLogLevel GetDebugLogLevel();
 }

@@ -5,7 +5,7 @@
 #include "EasyJsonParserV2Debug.h"
 
 // ========================================
-// JSON読み込み機能
+// JSON loading functionality
 // ========================================
 
 FEasyJsonObjectV2 UEasyJsonParserV2BlueprintLibrary::LoadJsonFromFile(const FString& FilePath, bool bAbsolutePath, bool& bSuccess, FString& ErrorMessage)
@@ -24,7 +24,7 @@ FEasyJsonObjectV2 UEasyJsonParserV2BlueprintLibrary::CreateEmptyJsonObject()
 }
 
 // ========================================
-// JSON読み込み操作
+// JSON reading operations
 // ========================================
 
 int32 UEasyJsonParserV2BlueprintLibrary::ReadInt(const FEasyJsonObjectV2& JsonObject, const FString& AccessString, int32 DefaultValue)
@@ -60,7 +60,7 @@ TArray<FEasyJsonObjectV2> UEasyJsonParserV2BlueprintLibrary::ReadObjects(const F
 }
 
 // ========================================
-// JSON書き込み操作
+// JSON writing operations
 // ========================================
 
 void UEasyJsonParserV2BlueprintLibrary::WriteInt(FEasyJsonObjectV2& JsonObject, const FString& AccessString, int32 Value)
@@ -89,7 +89,7 @@ void UEasyJsonParserV2BlueprintLibrary::WriteObject(FEasyJsonObjectV2& JsonObjec
 }
 
 // ========================================
-// 配列操作
+// Array operations
 // ========================================
 
 void UEasyJsonParserV2BlueprintLibrary::AddIntToArray(FEasyJsonObjectV2& JsonObject, const FString& AccessString, int32 Value)
@@ -118,7 +118,7 @@ void UEasyJsonParserV2BlueprintLibrary::AddObjectToArray(FEasyJsonObjectV2& Json
 }
 
 // ========================================
-// JSON保存機能
+// JSON saving functionality
 // ========================================
 
 void UEasyJsonParserV2BlueprintLibrary::SaveJsonToFile(const FEasyJsonObjectV2& JsonObject, const FString& FilePath, bool bAbsolutePath, bool bPrettyPrint, bool& bSuccess, FString& ErrorMessage)
@@ -132,7 +132,7 @@ FString UEasyJsonParserV2BlueprintLibrary::JsonToString(const FEasyJsonObjectV2&
 }
 
 // ========================================
-// ユーティリティ機能
+// Utility functionality
 // ========================================
 
 bool UEasyJsonParserV2BlueprintLibrary::IsJsonObjectValid(const FEasyJsonObjectV2& JsonObject)
@@ -162,7 +162,7 @@ bool UEasyJsonParserV2BlueprintLibrary::AreJsonObjectsEqual(const FEasyJsonObjec
 }
 
 // ========================================
-// デバッグ機能
+// Debug functionality
 // ========================================
 
 void UEasyJsonParserV2BlueprintLibrary::SetDebugMode(bool bEnable)
