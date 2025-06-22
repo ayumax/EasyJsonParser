@@ -2,7 +2,7 @@
 
 #include "EasyJsonParserV2Debug.h"
 #include "Engine/Engine.h"
-#include "HAL/PlatformFilemanager.h"
+#include "HAL/PlatformFileManager.h"
 #include "Misc/DateTime.h"
 
 DEFINE_LOG_CATEGORY(LogEasyJsonParserV2);
