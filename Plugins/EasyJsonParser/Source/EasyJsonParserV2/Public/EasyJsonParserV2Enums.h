@@ -18,8 +18,8 @@ enum class EEasyJsonParserV2ErrorCode : uint8
 UENUM(BlueprintType)
 enum class EEasyJsonParserV2DebugLogLevel : uint8
 {
-	None = 0 UMETA(DisplayName = "None"),        // ログ出力なし
-	Basic = 1 UMETA(DisplayName = "Basic"),      // 基本的なエラー情報のみ
-	Detailed = 2 UMETA(DisplayName = "Detailed"), // 詳細なデバッグ情報
-	Verbose = 3 UMETA(DisplayName = "Verbose")   // 全ての操作を詳細記録
+	None = 0 UMETA(DisplayName = "None"),        // No log output
+	Basic = 1 UMETA(DisplayName = "Basic"),      // Basic error information only
+	Detailed = 2 UMETA(DisplayName = "Detailed"), // Detailed debug information
+	Verbose = 3 UMETA(DisplayName = "Verbose")   // Record all operations in detail
 };
