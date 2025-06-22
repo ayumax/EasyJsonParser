@@ -27,7 +27,29 @@
       ]
     },
     {
+      "Name": "EasyJsonParserV2",
+      "Type": "Runtime",
+      "LoadingPhase": "Default",
+      "WhitelistPlatforms": [
+        "Android",
+        "Win64",
+        "Mac",
+        "IOS",
+        "Linux"
+      ]
+    },
+    {
       "Name": "EasyJsonParserTests",
+      "Type": "DeveloperTool",
+      "LoadingPhase": "Default",
+      "WhitelistPlatforms": [
+        "Win64",
+        "Mac",
+        "Linux"
+      ]
+    },
+    {
+      "Name": "EasyJsonParserV2Tests",
       "Type": "DeveloperTool",
       "LoadingPhase": "Default",
       "WhitelistPlatforms": [
