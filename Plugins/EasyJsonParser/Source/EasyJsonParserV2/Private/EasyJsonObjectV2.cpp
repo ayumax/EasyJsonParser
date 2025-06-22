@@ -150,55 +150,30 @@ TArray<FEasyJsonObjectV2> FEasyJsonObjectV2::ReadObjects(const FString& AccessSt
 
 void FEasyJsonObjectV2::WriteInt(const FString& AccessString, int32 Value)
 {
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueNumber(static_cast<double>(Value)));
 	CreateValue(AccessString, NewValue);
 }
 
 void FEasyJsonObjectV2::WriteFloat(const FString& AccessString, float Value)
 {
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueNumber(static_cast<double>(Value)));
 	CreateValue(AccessString, NewValue);
 }
 
 void FEasyJsonObjectV2::WriteString(const FString& AccessString, const FString& Value)
 {
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueString(Value));
 	CreateValue(AccessString, NewValue);
 }
 
 void FEasyJsonObjectV2::WriteBool(const FString& AccessString, bool Value)
 {
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
 	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueBoolean(Value));
 	CreateValue(AccessString, NewValue);
 }
 
 void FEasyJsonObjectV2::WriteObject(const FString& AccessString, const FEasyJsonObjectV2& Object)
 {
-	if (!IsValid())
-	{
-		InnerObject = MakeShareable(new FJsonObject());
-	}
-	
 	if (Object.IsValid())
 	{
 		TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueObject(Object.InnerObject));
@@ -208,27 +183,221 @@ void FEasyJsonObjectV2::WriteObject(const FString& AccessString, const FEasyJson
 
 void FEasyJsonObjectV2::AddIntToArray(const FString& AccessString, int32 Value)
 {
-	// TODO: Implement in write phase
+	if (!IsValid())
+	{
+		InnerObject = MakeShareable(new FJsonObject());
+	}
+	
+	// Get the target array
+	TSharedPtr<FJsonObject> ParentObject = CreateOrGetObject(AccessString);
+	if (!ParentObject.IsValid())
+	{
+		return;
+	}
+	
+	TArray<FString> Accessers;
+	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
+	
+	if (Accessers.Num() == 0)
+	{
+		return;
+	}
+	
+	const FString& FinalAccessor = Accessers.Last();
+	FString PropertyName;
+	int32 ArrayIndex = 0;
+	bool bIsArray = IsAccessAsArray(FinalAccessor, PropertyName, ArrayIndex);
+	
+	// Use property name without array index for getting the array
+	FString ArrayPropertyName = bIsArray ? PropertyName : FinalAccessor;
+	
+	// Get existing array or create new one
+	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
+	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
+	
+	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
+	{
+		ModifiedArray = *ExistingArray;
+	}
+	
+	// Add the new value
+	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueNumber(static_cast<double>(Value)));
+	ModifiedArray.Add(NewValue);
+	
+	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
 }
 
 void FEasyJsonObjectV2::AddFloatToArray(const FString& AccessString, float Value)
 {
-	// TODO: Implement in write phase
+	if (!IsValid())
+	{
+		InnerObject = MakeShareable(new FJsonObject());
+	}
+	
+	TSharedPtr<FJsonObject> ParentObject = CreateOrGetObject(AccessString);
+	if (!ParentObject.IsValid())
+	{
+		return;
+	}
+	
+	TArray<FString> Accessers;
+	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
+	
+	if (Accessers.Num() == 0)
+	{
+		return;
+	}
+	
+	const FString& FinalAccessor = Accessers.Last();
+	FString PropertyName;
+	int32 ArrayIndex = 0;
+	bool bIsArray = IsAccessAsArray(FinalAccessor, PropertyName, ArrayIndex);
+	
+	FString ArrayPropertyName = bIsArray ? PropertyName : FinalAccessor;
+	
+	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
+	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
+	
+	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
+	{
+		ModifiedArray = *ExistingArray;
+	}
+	
+	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueNumber(static_cast<double>(Value)));
+	ModifiedArray.Add(NewValue);
+	
+	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
 }
 
 void FEasyJsonObjectV2::AddStringToArray(const FString& AccessString, const FString& Value)
 {
-	// TODO: Implement in write phase
+	if (!IsValid())
+	{
+		InnerObject = MakeShareable(new FJsonObject());
+	}
+	
+	TSharedPtr<FJsonObject> ParentObject = CreateOrGetObject(AccessString);
+	if (!ParentObject.IsValid())
+	{
+		return;
+	}
+	
+	TArray<FString> Accessers;
+	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
+	
+	if (Accessers.Num() == 0)
+	{
+		return;
+	}
+	
+	const FString& FinalAccessor = Accessers.Last();
+	FString PropertyName;
+	int32 ArrayIndex = 0;
+	bool bIsArray = IsAccessAsArray(FinalAccessor, PropertyName, ArrayIndex);
+	
+	FString ArrayPropertyName = bIsArray ? PropertyName : FinalAccessor;
+	
+	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
+	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
+	
+	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
+	{
+		ModifiedArray = *ExistingArray;
+	}
+	
+	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueString(Value));
+	ModifiedArray.Add(NewValue);
+	
+	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
 }
 
 void FEasyJsonObjectV2::AddBoolToArray(const FString& AccessString, bool Value)
 {
-	// TODO: Implement in write phase
+	if (!IsValid())
+	{
+		InnerObject = MakeShareable(new FJsonObject());
+	}
+	
+	TSharedPtr<FJsonObject> ParentObject = CreateOrGetObject(AccessString);
+	if (!ParentObject.IsValid())
+	{
+		return;
+	}
+	
+	TArray<FString> Accessers;
+	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
+	
+	if (Accessers.Num() == 0)
+	{
+		return;
+	}
+	
+	const FString& FinalAccessor = Accessers.Last();
+	FString PropertyName;
+	int32 ArrayIndex = 0;
+	bool bIsArray = IsAccessAsArray(FinalAccessor, PropertyName, ArrayIndex);
+	
+	FString ArrayPropertyName = bIsArray ? PropertyName : FinalAccessor;
+	
+	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
+	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
+	
+	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
+	{
+		ModifiedArray = *ExistingArray;
+	}
+	
+	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueBoolean(Value));
+	ModifiedArray.Add(NewValue);
+	
+	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
 }
 
 void FEasyJsonObjectV2::AddObjectToArray(const FString& AccessString, const FEasyJsonObjectV2& Object)
 {
-	// TODO: Implement in write phase
+	if (!Object.IsValid())
+	{
+		return;
+	}
+	
+	if (!IsValid())
+	{
+		InnerObject = MakeShareable(new FJsonObject());
+	}
+	
+	TSharedPtr<FJsonObject> ParentObject = CreateOrGetObject(AccessString);
+	if (!ParentObject.IsValid())
+	{
+		return;
+	}
+	
+	TArray<FString> Accessers;
+	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
+	
+	if (Accessers.Num() == 0)
+	{
+		return;
+	}
+	
+	const FString& FinalAccessor = Accessers.Last();
+	FString PropertyName;
+	int32 ArrayIndex = 0;
+	bool bIsArray = IsAccessAsArray(FinalAccessor, PropertyName, ArrayIndex);
+	
+	FString ArrayPropertyName = bIsArray ? PropertyName : FinalAccessor;
+	
+	const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
+	TArray<TSharedPtr<FJsonValue>> ModifiedArray;
+	
+	if (ParentObject->TryGetArrayField(ArrayPropertyName, ExistingArray))
+	{
+		ModifiedArray = *ExistingArray;
+	}
+	
+	TSharedPtr<FJsonValue> NewValue = MakeShareable(new FJsonValueObject(Object.InnerObject));
+	ModifiedArray.Add(NewValue);
+	
+	ParentObject->SetArrayField(ArrayPropertyName, ModifiedArray);
 }
 
 FEasyJsonObjectV2 FEasyJsonObjectV2::CreateEmpty()
@@ -408,12 +577,195 @@ void FEasyJsonObjectV2::GetObject(const TSharedPtr<FJsonObject> TargetObject, co
 
 TSharedPtr<FJsonObject> FEasyJsonObjectV2::CreateOrGetObject(const FString& AccessString)
 {
-	// TODO: Implement in write phase
-	return nullptr;
+	if (!IsValid())
+	{
+		InnerObject = MakeShareable(new FJsonObject());
+	}
+	
+	TArray<FString> Accessers;
+	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
+	
+	TSharedPtr<FJsonObject> CurrentObject = InnerObject;
+	
+	for (int32 i = 0; i < Accessers.Num(); ++i)
+	{
+		const FString& AccessName = Accessers[i];
+		
+		FString PropertyName;
+		int32 ArrayIndex = 0;
+		bool bIsArray = IsAccessAsArray(AccessName, PropertyName, ArrayIndex);
+		
+		// If this is the last element, we don't need to go deeper
+		if (i == Accessers.Num() - 1)
+		{
+			return CurrentObject;
+		}
+		
+		// Check if property already exists
+		if (!CurrentObject->HasField(PropertyName))
+		{
+			// Create new object or array based on the next accessor
+			bool bNextIsArray = false;
+			if (i + 1 < Accessers.Num())
+			{
+				FString NextPropertyName;
+				int32 NextArrayIndex = 0;
+				bNextIsArray = IsAccessAsArray(Accessers[i + 1], NextPropertyName, NextArrayIndex);
+			}
+			
+			if (bIsArray)
+			{
+				// Create array
+				TArray<TSharedPtr<FJsonValue>> NewArray;
+				// Expand array to required size
+				for (int32 j = 0; j <= ArrayIndex; ++j)
+				{
+					if (bNextIsArray || i + 1 < Accessers.Num())
+					{
+						NewArray.Add(MakeShareable(new FJsonValueObject(MakeShareable(new FJsonObject()))));
+					}
+					else
+					{
+						NewArray.Add(MakeShareable(new FJsonValueNull()));
+					}
+				}
+				CurrentObject->SetArrayField(PropertyName, NewArray);
+			}
+			else
+			{
+				// Create object
+				TSharedPtr<FJsonObject> NewObject = MakeShareable(new FJsonObject());
+				CurrentObject->SetObjectField(PropertyName, NewObject);
+			}
+		}
+		
+		// Navigate to next level
+		if (bIsArray)
+		{
+			const TArray<TSharedPtr<FJsonValue>>* ArrayValue;
+			if (CurrentObject->TryGetArrayField(PropertyName, ArrayValue))
+			{
+				// Expand array if necessary
+				if (ArrayIndex >= ArrayValue->Num())
+				{
+					// Need to expand array
+					TArray<TSharedPtr<FJsonValue>> ExpandedArray = *ArrayValue;
+					while (ExpandedArray.Num() <= ArrayIndex)
+					{
+						ExpandedArray.Add(MakeShareable(new FJsonValueNull()));
+					}
+					CurrentObject->SetArrayField(PropertyName, ExpandedArray);
+					
+					// Get updated array
+					CurrentObject->TryGetArrayField(PropertyName, ArrayValue);
+				}
+				
+				if (ArrayIndex < ArrayValue->Num())
+				{
+					if ((*ArrayValue)[ArrayIndex]->Type == EJson::Object)
+					{
+						const TSharedPtr<FJsonObject>* ObjectPtr;
+						if ((*ArrayValue)[ArrayIndex]->TryGetObject(ObjectPtr))
+						{
+							CurrentObject = *ObjectPtr;
+						}
+					}
+					else
+					{
+						// Replace with object
+						TSharedPtr<FJsonObject> NewObject = MakeShareable(new FJsonObject());
+						TArray<TSharedPtr<FJsonValue>> ModifiedArray = *ArrayValue;
+						ModifiedArray[ArrayIndex] = MakeShareable(new FJsonValueObject(NewObject));
+						CurrentObject->SetArrayField(PropertyName, ModifiedArray);
+						CurrentObject = NewObject;
+					}
+				}
+			}
+		}
+		else
+		{
+			const TSharedPtr<FJsonObject>* ObjectPtr;
+			if (CurrentObject->TryGetObjectField(PropertyName, ObjectPtr))
+			{
+				CurrentObject = *ObjectPtr;
+			}
+		}
+	}
+	
+	return CurrentObject;
 }
 
 TSharedPtr<FJsonValue> FEasyJsonObjectV2::CreateValue(const FString& AccessString, TSharedPtr<FJsonValue> NewValue)
 {
-	// TODO: Implement in write phase
-	return nullptr;
+	if (!IsValid())
+	{
+		InnerObject = MakeShareable(new FJsonObject());
+	}
+	
+	TArray<FString> Accessers;
+	AccessString.ParseIntoArray(Accessers, TEXT("."), true);
+	
+	if (Accessers.Num() == 0)
+	{
+		return nullptr;
+	}
+	
+	// Get the parent object that should contain the final property
+	FString ParentPath;
+	for (int32 i = 0; i < Accessers.Num() - 1; ++i)
+	{
+		if (i > 0) ParentPath += TEXT(".");
+		ParentPath += Accessers[i];
+	}
+	
+	TSharedPtr<FJsonObject> ParentObject;
+	if (ParentPath.IsEmpty())
+	{
+		ParentObject = InnerObject;
+	}
+	else
+	{
+		ParentObject = CreateOrGetObject(ParentPath);
+	}
+	
+	if (!ParentObject.IsValid())
+	{
+		return nullptr;
+	}
+	
+	// Set the final property
+	const FString& FinalAccessor = Accessers.Last();
+	FString PropertyName;
+	int32 ArrayIndex = 0;
+	bool bIsArray = IsAccessAsArray(FinalAccessor, PropertyName, ArrayIndex);
+	
+	if (bIsArray)
+	{
+		// Handle array assignment
+		const TArray<TSharedPtr<FJsonValue>>* ExistingArray;
+		TArray<TSharedPtr<FJsonValue>> ModifiedArray;
+		
+		if (ParentObject->TryGetArrayField(PropertyName, ExistingArray))
+		{
+			ModifiedArray = *ExistingArray;
+		}
+		
+		// Expand array if necessary
+		while (ModifiedArray.Num() <= ArrayIndex)
+		{
+			ModifiedArray.Add(MakeShareable(new FJsonValueNull()));
+		}
+		
+		// Set the value
+		ModifiedArray[ArrayIndex] = NewValue;
+		ParentObject->SetArrayField(PropertyName, ModifiedArray);
+		
+		return NewValue;
+	}
+	else
+	{
+		// Handle direct property assignment
+		ParentObject->SetField(PropertyName, NewValue);
+		return NewValue;
+	}
 }
