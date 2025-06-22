@@ -140,7 +140,7 @@ FEasyJsonV2DebugScope::~FEasyJsonV2DebugScope()
         
         FEasyJsonV2DebugLogger::LogPerformance(OperationName, ElapsedTime);
         
-        // チェックポイントの詳細ログ出力
+        // Output detailed checkpoint logs
         if (FEasyJsonV2DebugLogger::GetLogLevel() >= EEasyJsonParserV2DebugLogLevel::Verbose && Checkpoints.Num() > 0)
         {
             FEasyJsonV2DebugLogger::LogDetail(FString::Printf(TEXT("Checkpoints for %s:"), *OperationName), 1);
@@ -169,7 +169,7 @@ void FEasyJsonV2DebugScope::LogCheckpoint(const FString& CheckpointName)
     }
 }
 
-// デバッグモード制御用のグローバル関数（将来的にはBlueprint関数ライブラリに移動予定）
+// Global functions for debug mode control (planned to be moved to Blueprint function library in the future)
 namespace EasyJsonParserV2Debug
 {
     void SetDebugEnabled(bool bEnabled)
