@@ -10,13 +10,13 @@ struct EASYJSONPARSERV2_API FAccessStep
 {
 	GENERATED_BODY()
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParserV2|Load")
 	FString PropertyName;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParserV2|Load")
 	TArray<int32> ArrayIndices;
 
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category = "EasyJsonParserV2|Load")
 	bool bIsArrayAccess = false;
 
 	FAccessStep()
