@@ -4,12 +4,9 @@
 		"name": "FileWriteTest",
 		"value": 42,
 		"success": true,
-		"tags":
-		{
-			"tags": [
-				"automation",
-				"testing"
-			]
-		}
+		"tags": [
+			"automation",
+			"testing"
+		]
 	}
 }

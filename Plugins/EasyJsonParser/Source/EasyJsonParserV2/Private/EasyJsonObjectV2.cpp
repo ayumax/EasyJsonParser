@@ -629,8 +629,23 @@ TSharedPtr<FJsonObject> FEasyJsonObjectV2::ToJsonObject() const
 
 bool FEasyJsonObjectV2::operator==(const FEasyJsonObjectV2& Other) const
 {
-	// Simple pointer comparison
-	return InnerObject == Other.InnerObject;
+	// If both objects are the same pointer, they're equal
+	if (InnerObject == Other.InnerObject)
+	{
+		return true;
+	}
+	
+	// If either object is null, they're only equal if both are null
+	if (!InnerObject.IsValid() || !Other.InnerObject.IsValid())
+	{
+		return !InnerObject.IsValid() && !Other.InnerObject.IsValid();
+	}
+	
+	// Convert both to compact JSON strings and compare
+	FString ThisJson = ToString(false);
+	FString OtherJson = Other.ToString(false);
+	
+	return ThisJson == OtherJson;
 }
 
 bool FEasyJsonObjectV2::operator!=(const FEasyJsonObjectV2& Other) const

@@ -142,7 +142,23 @@ bool UEasyJsonParserV2BlueprintLibrary::IsJsonObjectValid(const FEasyJsonObjectV
 
 bool UEasyJsonParserV2BlueprintLibrary::AreJsonObjectsEqual(const FEasyJsonObjectV2& JsonObjectA, const FEasyJsonObjectV2& JsonObjectB)
 {
-	return JsonObjectA == JsonObjectB;
+	// Check if both objects are valid
+	if (!JsonObjectA.IsValid() && !JsonObjectB.IsValid())
+	{
+		return true; // Both null/invalid, consider equal
+	}
+	
+	if (!JsonObjectA.IsValid() || !JsonObjectB.IsValid())
+	{
+		return false; // One is null, one is not
+	}
+	
+	// Convert both to JSON strings in a normalized format for comparison
+	// Use compact format (no pretty print) to avoid formatting differences
+	FString JsonStringA = JsonToString(JsonObjectA, false);
+	FString JsonStringB = JsonToString(JsonObjectB, false);
+	
+	return JsonStringA == JsonStringB;
 }
 
 // ========================================
