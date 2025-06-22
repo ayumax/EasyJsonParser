@@ -2,7 +2,7 @@
 #include "Misc/AutomationTest.h"
 #include "EasyJsonParseManager.h"
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FNodeAccessTest, "EasyJsonParser.NodeAccessTest", EAutomationTestFlags_ApplicationContextMask | EAutomationTestFlags::SmokeFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FNodeAccessTest, "EasyJsonParser.NodeAccessTest", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::SmokeFilter)
 
 bool FNodeAccessTest::RunTest(const FString& Parameters)
 {
