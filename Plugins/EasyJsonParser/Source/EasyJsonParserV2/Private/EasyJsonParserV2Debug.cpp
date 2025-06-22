@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright 2025 ayumax. All Rights Reserved.
 
 #include "EasyJsonParserV2Debug.h"
 #include "Engine/Engine.h"
@@ -7,7 +7,6 @@
 
 DEFINE_LOG_CATEGORY(LogEasyJsonParserV2);
 
-// デバッグモード設定（将来的にはコンフィグファイルから読み込み予定）
 static EEasyJsonParserV2DebugLogLevel GDebugLogLevel = EEasyJsonParserV2DebugLogLevel::None;
 static bool GDebugModeEnabled = false;
 
@@ -191,10 +190,10 @@ namespace EasyJsonParserV2Debug
         return GDebugModeEnabled;
     }
     
-    void SetDebugLogLevel(EEasyJsonParserV2DebugLogLevel LogLevel)
+    void SetDebugLogLevel(EEasyJsonParserV2DebugLogLevel DebugLogLevel)
     {
-        GDebugLogLevel = LogLevel;
-        UE_LOG(LogEasyJsonParserV2, Warning, TEXT("EasyJsonParserV2 Debug Log Level set to: %d"), static_cast<int32>(LogLevel));
+        GDebugLogLevel = DebugLogLevel;
+        UE_LOG(LogEasyJsonParserV2, Warning, TEXT("EasyJsonParserV2 Debug Log Level set to: %d"), static_cast<int32>(DebugLogLevel));
     }
     
     EEasyJsonParserV2DebugLogLevel GetDebugLogLevel()
