@@ -234,4 +234,145 @@ bool FEasyJsonParserV2FileWriteTest::RunTest(const FString& Parameters)
 	return true;
 }
 
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FEasyJsonParserV2PathAutoCreationTest, "EasyJsonParser.V2.PathAutoCreation", EAutomationTestFlags::EditorContext | EAutomationTestFlags::ProductFilter)
+
+bool FEasyJsonParserV2PathAutoCreationTest::RunTest(const FString& Parameters)
+{
+	FEasyJsonObjectV2 JsonObject = FEasyJsonObjectV2::CreateEmpty();
+	
+	// Test 1: Auto-create simple nested path
+	JsonObject.WriteString("settings.theme", "dark");
+	TestEqual("Should auto-create path and set value", JsonObject.ReadString("settings.theme"), FString("dark"));
+	
+	// Verify intermediate object was created
+	bool bFound = false;
+	FEasyJsonObjectV2 SettingsObj = JsonObject.ReadObject("settings", bFound);
+	TestTrue("Settings object should exist", bFound);
+	TestTrue("Settings object should be valid", SettingsObj.IsValid());
+	TestEqual("Should read theme from settings object", SettingsObj.ReadString("theme"), FString("dark"));
+	
+	// Test 2: Auto-create deep nested path
+	JsonObject.WriteInt("user.preferences.display.brightness", 80);
+	JsonObject.WriteBool("user.preferences.display.fullscreen", true);
+	
+	TestEqual("Should read nested brightness", JsonObject.ReadInt("user.preferences.display.brightness"), 80);
+	TestEqual("Should read nested fullscreen", JsonObject.ReadBool("user.preferences.display.fullscreen"), true);
+	
+	// Verify all intermediate objects exist
+	FEasyJsonObjectV2 UserObj = JsonObject.ReadObject("user", bFound);
+	TestTrue("User object should exist", bFound);
+	
+	FEasyJsonObjectV2 PrefsObj = JsonObject.ReadObject("user.preferences", bFound);
+	TestTrue("Preferences object should exist", bFound);
+	
+	FEasyJsonObjectV2 DisplayObj = JsonObject.ReadObject("user.preferences.display", bFound);
+	TestTrue("Display object should exist", bFound);
+	
+	// Test 3: Auto-create array elements
+	JsonObject.WriteString("profiles[0].name", "Default Profile");
+	JsonObject.WriteInt("profiles[0].id", 1);
+	JsonObject.WriteString("profiles[1].name", "Work Profile");
+	JsonObject.WriteInt("profiles[1].id", 2);
+	
+	TestEqual("Array element 0 name", JsonObject.ReadString("profiles[0].name"), FString("Default Profile"));
+	TestEqual("Array element 0 id", JsonObject.ReadInt("profiles[0].id"), 1);
+	TestEqual("Array element 1 name", JsonObject.ReadString("profiles[1].name"), FString("Work Profile"));
+	TestEqual("Array element 1 id", JsonObject.ReadInt("profiles[1].id"), 2);
+	
+	// Test 4: Complex nested array object creation
+	JsonObject.WriteString("data.users[0].settings.language", "en");
+	JsonObject.WriteBool("data.users[0].settings.notifications", true);
+	JsonObject.WriteString("data.users[1].settings.language", "ja");
+	JsonObject.WriteBool("data.users[1].settings.notifications", false);
+	
+	TestEqual("Complex nested language user 0", JsonObject.ReadString("data.users[0].settings.language"), FString("en"));
+	TestEqual("Complex nested notifications user 0", JsonObject.ReadBool("data.users[0].settings.notifications"), true);
+	TestEqual("Complex nested language user 1", JsonObject.ReadString("data.users[1].settings.language"), FString("ja"));
+	TestEqual("Complex nested notifications user 1", JsonObject.ReadBool("data.users[1].settings.notifications"), false);
+	
+	// Test 5: Create intermediate path levels
+	JsonObject.WriteString("level1.level2.level3.level4.deepValue", "success");
+	
+	// Verify all intermediate levels exist
+	FEasyJsonObjectV2 Level1 = JsonObject.ReadObject("level1", bFound);
+	TestTrue("Level1 should exist", bFound && Level1.IsValid());
+	
+	FEasyJsonObjectV2 Level2 = JsonObject.ReadObject("level1.level2", bFound);
+	TestTrue("Level2 should exist", bFound && Level2.IsValid());
+	
+	FEasyJsonObjectV2 Level3 = JsonObject.ReadObject("level1.level2.level3", bFound);
+	TestTrue("Level3 should exist", bFound && Level3.IsValid());
+	
+	FEasyJsonObjectV2 Level4 = JsonObject.ReadObject("level1.level2.level3.level4", bFound);
+	TestTrue("Level4 should exist", bFound && Level4.IsValid());
+	
+	TestEqual("Deep value should be readable", JsonObject.ReadString("level1.level2.level3.level4.deepValue"), FString("success"));
+	
+	// Test 6: Mixed array and object creation
+	JsonObject.WriteFloat("items[2].properties.advanced.weight", 2.5f);
+	JsonObject.WriteString("items[2].properties.advanced.material", "steel");
+	
+	TestEqual("Mixed path weight", JsonObject.ReadFloat("items[2].properties.advanced.weight"), 2.5f);
+	TestEqual("Mixed path material", JsonObject.ReadString("items[2].properties.advanced.material"), FString("steel"));
+	
+	// Test 7: Overwrite protection - should not lose existing data
+	JsonObject.WriteString("existing.data", "important");
+	JsonObject.WriteString("existing.newData", "additional");
+	
+	TestEqual("Should have original data", JsonObject.ReadString("existing.data"), FString("important"));
+	TestEqual("Should have new data", JsonObject.ReadString("existing.newData"), FString("additional"));
+	
+	// Verify existing object structure
+	FEasyJsonObjectV2 ExistingObj = JsonObject.ReadObject("existing", bFound);
+	TestTrue("Existing object should be found", bFound);
+	TestEqual("Should read data from existing object", ExistingObj.ReadString("data"), FString("important"));
+	TestEqual("Should read newData from existing object", ExistingObj.ReadString("newData"), FString("additional"));
+	
+	// Test 8: Array of objects with mixed types
+	JsonObject.WriteString("inventory[0].type", "weapon");
+	JsonObject.WriteString("inventory[0].name", "Sword");
+	JsonObject.WriteInt("inventory[0].damage", 50);
+	JsonObject.WriteBool("inventory[0].equipped", true);
+	
+	JsonObject.WriteString("inventory[1].type", "armor");
+	JsonObject.WriteString("inventory[1].name", "Shield");
+	JsonObject.WriteInt("inventory[1].defense", 25);
+	JsonObject.WriteBool("inventory[1].equipped", false);
+	
+	TestEqual("Inventory item 0 type", JsonObject.ReadString("inventory[0].type"), FString("weapon"));
+	TestEqual("Inventory item 0 name", JsonObject.ReadString("inventory[0].name"), FString("Sword"));
+	TestEqual("Inventory item 0 damage", JsonObject.ReadInt("inventory[0].damage"), 50);
+	TestEqual("Inventory item 0 equipped", JsonObject.ReadBool("inventory[0].equipped"), true);
+	
+	TestEqual("Inventory item 1 type", JsonObject.ReadString("inventory[1].type"), FString("armor"));
+	TestEqual("Inventory item 1 name", JsonObject.ReadString("inventory[1].name"), FString("Shield"));
+	TestEqual("Inventory item 1 defense", JsonObject.ReadInt("inventory[1].defense"), 25);
+	TestEqual("Inventory item 1 equipped", JsonObject.ReadBool("inventory[1].equipped"), false);
+	
+	// Test 9: Write to existing structure should not break it
+	JsonObject.WriteString("user.profile.email", "user@example.com");
+	
+	// Verify existing user structure is intact
+	TestEqual("Should still have brightness", JsonObject.ReadInt("user.preferences.display.brightness"), 80);
+	TestEqual("Should still have fullscreen", JsonObject.ReadBool("user.preferences.display.fullscreen"), true);
+	TestEqual("Should have new email", JsonObject.ReadString("user.profile.email"), FString("user@example.com"));
+	
+	// Test 10: JSON structure integrity
+	FString JsonString = JsonObject.ToString(false);
+	TestTrue("JSON string should not be empty", !JsonString.IsEmpty());
+	
+	// Test round-trip to ensure structure is valid
+	bool bSuccess = false;
+	FEasyJsonObjectV2 ReloadedObject = FEasyJsonObjectV2::CreateFromString(JsonString, bSuccess);
+	TestTrue("Round-trip should succeed", bSuccess);
+	
+	// Verify some key values after round-trip
+	TestEqual("Round-trip settings theme", ReloadedObject.ReadString("settings.theme"), FString("dark"));
+	TestEqual("Round-trip deep value", ReloadedObject.ReadString("level1.level2.level3.level4.deepValue"), FString("success"));
+	TestEqual("Round-trip array value", ReloadedObject.ReadString("profiles[0].name"), FString("Default Profile"));
+	TestEqual("Round-trip mixed path", ReloadedObject.ReadFloat("items[2].properties.advanced.weight"), 2.5f);
+	
+	return true;
+}
+
 #endif // WITH_DEV_AUTOMATION_TESTS
